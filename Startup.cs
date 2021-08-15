@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
+using Newtonsoft.Json;
 
 namespace http
 {
@@ -33,6 +34,63 @@ namespace http
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapPost("/body-data", async context =>
+                {
+                    context.Response.Headers.Add("Content-Type", "text/html; charset=utf-8");
+                    using (StreamReader stream = new StreamReader(context.Request.Body))
+                    {
+                        string body = await stream.ReadToEndAsync();
+                        // ObjBody data = JsonConvert.DeserializeObject<ObjBody>(body);
+                        dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
+                        await context.Response.WriteAsync($"<h1>Parametros no http</h1>");
+                        await context.Response.WriteAsync($"Parametro danilo = {data.danilo}<br>");
+                        await context.Response.WriteAsync($"Parametro parceiro = {data.parceiro}<br>");
+                    }
+                });
+
+                endpoints.MapPost("/form-data", async context =>
+                {
+                    /*
+                    <!DOCTYPE html>
+                    <html>
+                    <body>
+
+                    <h2>HTML Forms</h2>
+
+                    <form method="post" action="https://localhost:5001/form-data">
+                    <label>Danilo:</label><br>
+                    <input type="text" name="danilo"><br>
+                    <label>Parceiro:</label><br>
+                    <input type="text" name="parceiro"><br><br>
+                    <input type="submit" value="Enviar">
+                    </form> 
+
+                    <p>If you click the "Submit" button, the form-data will be sent to a page called "/action_page.php".</p>
+
+                    </body>
+                    </html>
+
+                    */
+                    context.Response.Headers.Add("Content-Type", "text/html; charset=utf-8");
+                    // var dict = context.Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
+                    string teste = context.Request.Form["danilo"].ToString();
+                    string teste2 = context.Request.Form["parceiro"].ToString();
+                    await context.Response.WriteAsync($"<h1>Parametros no http</h1>");
+                    await context.Response.WriteAsync($"Parametro danilo = {teste}<br>");
+                    await context.Response.WriteAsync($"Parametro parceiro = {teste2}<br>");
+                });
+
+                //https://localhost:5001/query-string?danilo=teste&parceiro=daniel
+                endpoints.MapGet("/query-string", async context =>
+                {
+                    context.Response.Headers.Add("Content-Type", "text/html; charset=utf-8");
+                    string teste = context.Request.Query["danilo"].ToString();
+                    string teste2 = context.Request.Query["parceiro"].ToString();
+                    await context.Response.WriteAsync($"<h1>Parametros no http</h1>");
+                    await context.Response.WriteAsync($"Parametro danilo = {teste}<br>");
+                    await context.Response.WriteAsync($"Parametro parceiro = {teste2}<br>");
+                });
+
                 endpoints.MapGet("/", async context =>
                 {
                     context.Response.Headers.Add("Content-Type", "text/html; charset=utf-8");
